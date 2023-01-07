@@ -29,7 +29,6 @@ class HopfieldNetwork:
                             image.append(-1)
 
             images.append(image)
-
         file.close()
         return images
     def getMatrix(self,file_name):
@@ -39,18 +38,18 @@ class HopfieldNetwork:
         file.close()
         return matrix
     def printModel(self,image):
-        count_new_line = 0
+        rows = 0
         for row_index in range(len(image)):
             for value_index in range(len(image[row_index])):
-                count_new_line += 1
-                if count_new_line == 5:
+                rows += 1
+                if rows == 5:
                     if image[row_index][value_index] == 1:
                         print(1)
                     elif image[row_index][value_index] == -1:
                         print(0)
                     if image[row_index][value_index] == 0:
                         print(0)
-                    count_new_line = 0
+                    rows = 0
                 else:
                     if image[row_index][value_index] == 1:
                         print(1, end='')
