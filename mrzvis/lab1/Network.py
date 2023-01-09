@@ -3,71 +3,78 @@ import matplotlib.image as image
 import numpy as np
 import copy
 import math
-n = 256
-m = 256
-alpha = 0.001
-hidden_layer_size = 512
-weight_matrix = np.random.randn(n * m * 3, hidden_layer_size)
-recover_weights_matrix = weight_matrix.T
-def learning( input, weight_matrix,recover_weights_matrix):
-    hidden_output = input @ weight_matrix
-    output = hidden_output @ recover_weights_matrix
-    delta = output - input
-    # alpha = 1 / (hidden_output @ hidden_output.T)
-    recover_weights_matrix -= alpha * (hidden_output.T @ delta)
-    # alpha = 1 / (input @ input.T)
-    weight_matrix -= alpha * (input.T @ (delta @ recover_weights_matrix.T))
-    weights_normalize()
-    error = np.sum(np.square(delta))
-    return error
-def normalize_img(pixels):
-    pixels = copy.deepcopy(pixels)
-    for row in range(len(pixels)):
-        for column in range(len(pixels[row])):
-            for color in range(len(pixels[row][column])):
-                pixels[row][column][color] = pixels[row][column][color] * 2 - 1
-    return pixels
+def learning(first_layer_values, w_matrix,recover_weights_matrix):
+    img_out = first_layer_values @ w_matrix
+    last_layer_values = img_out @ recover_weights_matrix
+    d = last_layer_values - first_layer_values
+    recover_weights_matrix -= a * (img_out.T @ d)
+    w_matrix -= a * (first_layer_values.T @ (d @ recover_weights_matrix.T))
+    w_matrix_standart()
+    e = np.sum(d*1/2)
+    return e
+def deep_copy(pix):
+    return copy.deepcopy(pix)
+def normalize_img(pix):
+    pix=deep_copy(pix)
+    for i in range(len(pix)):
+        for j in range(len(pix[i])):
+            for color in range(len(pix[i][j])):
+                pix[i][j][color] = pix[i][j][color] * 2 - 1
+    return pix
 def save_image():
-    np.save(r"weight_matrix.npy", weight_matrix)
+    np.save(r"w_matrix.npy", w_matrix)
+    save_recovered_weights()
+    with open(r"info.txt", "w") as file:
+        file.write(str(n))
+        file.write(str(m))
+        file.write(str(neyron_layer_size))
+
+def save_recovered_weights():
     np.save(r"recover_weights_matrix.npy", recover_weights_matrix)
-    with open(r"data.txt", "w") as file:
-        file.write(str(n) + " " + str(m) + " " + str(hidden_layer_size))
-def load_weights():
-    weight_matrix = np.load(r"weight_matrix.npy")
-    recover_weights_matrix = np.load(r"recover_weights_matrix.npy")
-    return weight_matrix, recover_weights_matrix
-def denormalize_img(pixels):
-    pixels = copy.deepcopy(pixels)
-    for row in range(len(pixels)):
-        for column in range(len(pixels[row])):
-            for color in range(len(pixels[row][column])):
-                pixels[row][column][color] = (pixels[row][column][color] + 1) / 2
-                if pixels[row][column][color] > 1:
-                    pixels[row][column][color] = 1
-                elif pixels[row][column][color] < 0:
-                    pixels[row][column][color] = 0
-    return pixels
-def to_image(colors, n, m):
-    return denormalize_img(np.array(colors).reshape((n, m, 3)))
+
+def pix_compare_with_1(pix):
+    if pix > 1:
+        pix=1
+    return pix
+def pix_compare_with_0(pix):
+    if pix < 0:
+        pix=0
+    return pix
+def denormalize_img(pix):
+    pix = deep_copy(pix)
+    for i in range(len(pix)):
+        for j in range(len(pix[i])):
+            for o in range(len(pix[j][o])):
+                pix[i][j][o] = (pix[i][j][o] + 1) / 2
+                pix_compare_with_1(pix[i][j][o])
+                pix_compare_with_0(pix[i][j][o])
+    return pix
 def load_image():
-    weight_matrix, recover_weights_matrix = load_weights()
-    with open(r"data.txt", "r") as file:
-        data = file.read().split()
-        n = int(data[0])
-        m = int(data[1])
-        hidden_layer_size = int(data[2])
-def weights_normalize():
-    weights_transpose = weight_matrix.T
-    decode_weights_transpose = recover_weights_matrix.T
-    for col in range(len(weight_matrix[0])):
-        module = np.linalg.norm(weights_transpose[col], ord=2)
-        for row in range(len(weight_matrix)):
-            weight_matrix[row][col] /= module
-    for row in range(len(recover_weights_matrix)):
-        module = np.linalg.norm(decode_weights_transpose[row], ord=2)
-        for col in range(len(recover_weights_matrix[0])):
-            recover_weights_matrix[row][col] /= module
+    w_matrix = np.load(r"w_matrix.npy")
+    recover_weights_matrix = np.load(r"recover_weights_matrix.npy")
+    with open(r"info.txt", "r") as info:
+        info = info.read()
+        info.split()
+
+def w_matrix_standart():
+    weights_transpose = w_matrix.T
+    transpose_weight_matrix = recover_weights_matrix.T
+    for j in range(len(w_matrix[0])):
+        mode = np.linalg.norm(weights_transpose[j], ord=2)
+        for i in range(len(w_matrix)):
+            w_matrix[i][j] /= mode
+    for i in range(len(recover_weights_matrix)):
+        mode = np.linalg.norm(transpose_weight_matrix[i], ord=2)
+        for j in range(len(recover_weights_matrix[0])):
+            recover_weights_matrix[i][j] /= mode
 def compress_block(block):
     return block
 def decompress_block(block):
     return block
+
+n = 256
+m = 256
+a = 0.001
+neyron_layer_size = 512
+w_matrix = np.random.randn(n * m * 3, neyron_layer_size)
+recover_weights_matrix = w_matrix.T
